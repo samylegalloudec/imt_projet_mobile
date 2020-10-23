@@ -17,6 +17,10 @@ let menuItems = [
     }
 ];
 
+let apiUrl = new Map();
+apiUrl.set('Sessions', 'https://devfest-nantes-2018-api.cleverapps.io/sessions');
+apiUrl.set('Présentateurs', 'https://devfest-nantes-2018-api.cleverapps.io/speakers');
+
 
 customElements.define('nav-home', class NavHome extends HTMLElement {
     connectedCallback() {
@@ -62,12 +66,12 @@ customElements.define('nav-home', class NavHome extends HTMLElement {
                 </div>
                 <div>
                     <center>
-                        <ion-button size="small" color="dark">Voir les sessions</ion-button>
+                        <ion-button size="small" color="dark" onclick=showDetail('Sessions')>Voir les sessions</ion-button>
                     </center>
                 </div>
                 <div>
                     <center>
-                        <ion-button size="small" color="dark">Voir les présentateurs</ion-button>
+                        <ion-button size="small" color="dark" onclick=showDetail('Présentateurs')>Voir les présentateurs</ion-button>
                     </center>
                 </div>
             </ion-content>
@@ -75,3 +79,53 @@ customElements.define('nav-home', class NavHome extends HTMLElement {
         `;
     }
 });
+
+const nav = document.querySelector('ion-nav');
+
+function showDetail(title) {
+    const selectedItem = menuItems.find(item => item.title === title);
+
+    nav.push('nav-detail', { selectedItem })
+}
+
+async function getData(url) {
+    let response = await fetch(url);
+    let data = await response.json()
+    return data;
+}
+
+function showDataDetail(item) {
+    console.log(item);
+}
+
+customElements.define('nav-detail', class NavDetail extends HTMLElement {
+
+    connectedCallback() {
+        getData(apiUrl.get(this.selectedItem.title)).then(response => {
+            let data = [];
+            for (let element of Object.entries(response)) {
+                data.push(element[1]);
+            }
+            this.innerHTML = `
+                <ion-header translucent>
+                <ion-toolbar>
+                    <ion-buttons slot="start">
+                    <ion-back-button defaultHref="/"></ion-back-button>
+                    </ion-buttons>
+                    <ion-title>${this.selectedItem.title}</ion-title>
+                </ion-toolbar>
+                </ion-header>
+                <ion-content fullscreen class="ion-padding">
+                    <ion-list>
+                    ${data.map(item => `
+                        <ion-item button onclick="showDataDetail('${item}}')">
+                            <ion-label>${this.selectedItem.title === "Sessions" ? item.title : item.name}</ion-label>
+                        </ion-item>
+                    `).join('\n')}
+                    </ion-list>
+                </ion-content>
+            `;
+        });
+    }
+});
+
