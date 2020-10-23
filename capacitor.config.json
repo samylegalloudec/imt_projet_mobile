@@ -1,7 +1,7 @@
 {
   "appId": "com.example.app",
-  "appName": "App",
-  "bundledWebRuntime": false,
+  "appName": "projet-mobile",
+  "bundledWebRuntime": true,
   "npmClient": "npm",
   "webDir": "www",
   "plugins": {
